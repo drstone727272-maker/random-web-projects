@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Ritam Archives</title>
+
+  <style>
+    :root {
+      --bg-overlay: rgba(5, 7, 20, 0.70);
+      --accent: #ffdf5b;
+      --accent-soft: rgba(255, 223, 91, 0.15);
+      --text-main: #ffffff;
+      --card-bg: rgba(15, 18, 40, 0.85);
+      --card-border: rgba(255, 255, 255, 0.12);
+    }
+
+    :root.light {
+      --bg-overlay: rgba(255, 255, 255, 0.75);
+      --accent: #ff7b3b;
+      --accent-soft: rgba(255, 123, 59, 0.15);
+      --text-main: #111111;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --card-border: rgba(0, 0, 0, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Background image + animated gradient overlay */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(-45deg, rgba(255, 90, 120, 0.5), rgba(120, 90, 255, 0.4), rgba(90, 220, 255, 0.4), rgba(255, 220, 120, 0.4)),
+        url("https://images.unsplash.com/photo-1729520126760-4e62f0a5f952?crop=entropy&cs=srgb&fm=jpg&q=85")
+          no-repeat center center / cover;
+      background-size: 300% 300%, cover;
+      animation: gradientMove 26s ease-in-out infinite;
+      z-index: -2;
+      filter: saturate(1.15);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top left, var(--accent-soft), transparent 55%),
+                  radial-gradient(circle at bottom right, rgba(0, 0, 0, 0.7), transparent 65%),
+                  linear-gradient(135deg, var(--bg-overlay), var(--bg-overlay));
+      z-index: -1;
+    }
+
+    @keyframes gradientMove {
+      0%   { background-position: 0% 50%, center; }
+      50%  { background-position: 100% 50%, center; }
+      100% { background-position: 0% 50%, center; }
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      position: relative;
+    }
+
+    a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -2px;
+      width: 100%;
+      height: 2px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.18s ease-out;
+    }
+
+    a:hover::after {
+      transform: scaleX(1);
+    }
+
+    .page-shell {
+      width: 100%;
+      max-width: 880px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 2.2fr);
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 12px;
+      }
+
+      .page-shell {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      border: 1px solid var(--card-border);
+      padding: 18px 18px 16px;
+      box-shadow:
+        0 18px 60px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(14px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(255, 223, 91, 0.22), transparent 60%);
+      top: -120px;
+      right: -110px;
+      opacity: 0.4;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 1.35rem;
+      font-weight: 650;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+    }
+
+    .pill {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(0, 0, 0, 0.18);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 10px #4ade80;
+    }
+
+    .hello-line {
+      margin-top: 2px;
+      font-size: 0.97rem;
+      opacity: 0.88;
+    }
+
+    .hello-line strong {
+      font-weight: 650;
+    }
+
+    .avatar-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0;
+    }
+
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 26px;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      box-shadow:
+        0 14px 35px rgba(0, 0, 0, 0.75),
+        0 0 0 1px rgba(0, 0, 0, 0.6);
+      transform: translateY(0);
+      transition: transform 0.18s ease-out, box-shadow 0.18s ease-out;
+      background: #000;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .avatar-wrap:hover .avatar {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow:
+        0 20px 45px rgba(0, 0, 0, 0.9),
+        0 0 0 1px rgba(255, 223, 91, 0.4);
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      font-size: 0.84rem;
+      opacity: 0.9;
+    }
+
+    .meta-row span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tiny-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    .theme-toggle-btn {
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: background 0.16s ease-out, transform 0.12s ease-out;
+    }
+
+    .theme-toggle-btn:hover {
+      background: rgba(0, 0, 0, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .theme-toggle-btn span.emoji {
+      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.55));
+    }
+
+    .archives-title {
+      font-size: 0.92rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      margin-top: 16px;
+      margin-bottom: 10px;
+      opacity: 0.9;
+    }
+
+    .archives-sub {
+      font-size: 0.9rem;
+      opacity: 0.72;
+      margin-bottom: 16px;
+    }
+
+    .archives-list {
+      display: grid;
+      gap: 10px;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    .archive-item {
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition:
+        transform 0.14s ease-out,
+        box-shadow 0.14s ease-out,
+        border-color 0.14s ease-out,
+        background 0.14s ease-out;
+    }
+
+    .archive-item::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.12), transparent 55%);
+      opacity: 0;
+      transition: opacity 0.16s ease-out;
+      pointer-events: none;
+    }
+
+    .archive-main {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .archive-label {
+      font-weight: 560;
+    }
+
+    .archive-note {
+      font-size: 0.8rem;
+      opacity: 0.78;
+    }
+
+    .archive-cta {
+      font-size: 0.82rem;
+      opacity: 0.9;
+      white-space: nowrap;
+    }
+
+    .archive-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.32);
+      border-color: rgba(255, 223, 91, 0.6);
+    }
+
+    .archive-item:hover::before {
+      opacity: 1;
+    }
+
+    .archive-item:hover .archive-label {
+      color: var(--accent);
+    }
+
+    .archive-item:hover a::after {
+      transform: scaleX(1);
+    }
+
+    .badge-row {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 0.78rem;
+      opacity: 0.86;
+    }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .marquee-shell {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.22);
+      opacity: 0.9;
+    }
+
+    .marquee-inner {
+      overflow: hidden;
+      white-space: nowrap;
+      position: relative;
+    }
+
+    .marquee-track {
+      display: inline-block;
+      padding-left: 100%;
+      animation: marquee 16s linear infinite;
+    }
+
+    @keyframes marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .marquee-inner:hover .marquee-track {
+      animation-play-state: paused;
+    }
+
+    .xp-bar-wrap {
+      margin-top: 14px;
+      font-size: 0.82rem;
+      opacity: 0.88;
+    }
+
+    .xp-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 4px;
+    }
+
+    .xp-bar {
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .xp-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #4ade80, #22c55e, #a3e635);
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.7);
+      transition: width 0.35s ease-out;
+    }
+
+    .fun-note {
+      margin-top: 6px;
+      font-size: 0.72rem;
+      opacity: 0.7;
+      font-style: italic;
+    }
+
+    /* Fade-in animation (IntersectionObserver targets) */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+    }
+
+    .fade-in.in-view {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Tiny easter egg text */
+    .secret-hint {
+      margin-top: 6px;
+      font-size: 0.7rem;
+      opacity: 0.4;
+      text-align: right;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <!-- Left card: greeting + meta -->
+    <section class="card fade-in">
+      <div class="card-inner">
+        <div class="title-row">
+          <h1>Ritam Archives</h1>
+          <div class="pill">
+            <span class="pill-dot"></span>
+            <span>Study hub</span>
+          </div>
+        </div>
+
+        <p class="hello-line">
+          Hello <strong id="userNameLabel">Ritam</strong><span> 👋</span>
+        </p>
+
+        <div class="avatar-wrap">
+          <a
+            href="https://i.ibb.co/zWJ5yxzm/Whats-App-Image-2026-01-02-at-1-06-11-AM.jpg"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Ritam's picture"
+          >
+            <div class="avatar">
+              <img
+                src="https://i.ibb.co/zWJ5yxzm/Whats-App-Image-2026-01-02-at-1-06-11-AM.jpg"
+                alt="Ritam"
+              />
+            </div>
+          </a>
+        </div>
+
+        <div class="meta-row">
+          <span><span class="tiny-dot"></span> All your links in one safe place</span>
+
+          <button class="theme-toggle-btn" id="themeToggle" type="button">
+            <span class="emoji" aria-hidden="true">🌙</span>
+            <span id="themeLabel">Dark</span>
+          </button>
+        </div>
+
+        <div class="xp-bar-wrap">
+          <div class="xp-label-row">
+            <span>Daily grind meter</span>
+            <span id="xpPercent">0%</span>
+          </div>
+          <div class="xp-bar">
+            <div class="xp-fill" id="xpFill"></div>
+          </div>
+          <p class="fun-note">Click links to level up this session.</p>
+        </div>
+
+        <p class="secret-hint">Psst… ↑ ↑ ↓ ↓ ← → ← → B A</p>
+      </div>
+    </section>
+
+    <!-- Right card: links -->
+    <section class="card fade-in" style="transition-delay: 0.12s;">
+      <div class="card-inner">
+        <h2 class="archives-title">Study archives</h2>
+        <p class="archives-sub">
+          One tap away from your C++, physics, maths and meme stash.
+        </p>
+
+        <div class="archives-list">
+          <button class="archive-item link-xp" data-url="https://dsa.apnacollege.in/">
+            <div class="archive-main">
+              <div class="archive-label">C++ DSA Courses</div>
+              <div class="archive-note">Apna College sheet for structured practice</div>
+            </div>
+            <div class="archive-cta">
+              <a href="https://dsa.apnacollege.in/" target="_blank" rel="noopener noreferrer">Open sheet →</a>
+            </div>
+          </button>
+
+          <button class="archive-item link-xp" data-url="https://youtu.be/8jLOx1hD3_o?si=NGZbAzpLs3Rh2_Yo">
+            <div class="archive-main">
+              <div class="archive-label">DSA YouTube Course</div>
+              <div class="archive-note">Full playlist bootcamp</div>
+            </div>
+            <div class="archive-cta">
+              <a href="https://youtu.be/8jLOx1hD3_o?si=NGZbAzpLs3Rh2_Yo" target="_blank" rel="noopener noreferrer">Watch now ▶</a>
+            </div>
+          </button>
+
+          <button class="archive-item link-xp" data-url="https://youtu.be/iUEjQQtrT50?si=Ty16JriA9YpRB4S3">
+            <div class="archive-main">
+              <div class="archive-label">Thermodynamics</div>
+              <div class="archive-note">Core concepts and problems</div>
+            </div>
+            <div class="archive-cta">
+              <a href="https://youtu.be/iUEjQQtrT50?si=Ty16JriA9YpRB4S3" target="_blank" rel="noopener noreferrer">Open lecture →</a>
+            </div>
+          </button>
+
+          <button class="archive-item link-xp" data-url="https://youtu.be/2LFJ1iGnMmk?si=B6h1ZajxFgsJkgSC">
+            <div class="archive-main">
+              <div class="archive-label">Electrodynamics</div>
+              <div class="archive-note">Fields, waves and intuition</div>
+            </div>
+            <div class="archive-cta">
+              <a href="https://youtu.be/2LFJ1iGnMmk?si=B6h1ZajxFgsJkgSC" target="_blank" rel="noopener noreferrer">Jump in ⚡</a>
+            </div>
+          </button>
+
+          <button class="archive-item link-xp" data-url="https://youtu.be/2LFJ1iGnMmk?si=RFoxlv8e0RyamdT8">
+            <div class="archive-main">
+              <div class="archive-label">Quantum Mechanics</div>
+              <div class="archive-note">Intro series – link 1</div>
+            </div>
+            <div class="archive-cta">
+              <a href="https://youtu.be/2LFJ1iGnMmk?si=RFoxlv8e0RyamdT8" target="_blank" rel="noopener noreferrer">Open link 1</a>
+            </div>
+          </button>
+
+          <button class="archive-item link-xp" data-url="https://youtu.be/OIPFBB4HpUY?si=-cOM2LYXaeEZ-eqk">
+            <div class="archive-main">
+              <div class="archive-label">Quantum Mechanics</div>
+              <div class="archive-note">Complementary series – link 2</div>
+            </div>
+            <div class="archive-cta">
+              <a href="https://youtu.be/OIPFBB4HpUY?si=-cOM2LYXaeEZ-eqk" target="_blank" rel="noopener noreferrer">Open link 2</a>
+            </div>
+          </button>
+
+          <button class="archive-item link-xp" data-url="https://youtu.be/Uf4BtghMLI8?si=wo7ZnWlnbiYm-RCk">
+            <div class="archive-main">
+              <div class="archive-label">Solid Mechanics</div>
+              <div class="archive-note">Deformation, stress, strain</div>
+            </div>
+            <div class="archive-cta">
+              <a href="https://youtu.be/Uf4BtghMLI8?si=wo7ZnWlnbiYm-RCk" target="_blank" rel="noopener noreferrer">Open lecture →</a>
+            </div>
+          </button>
+
+          <button class="archive-item link-xp" data-url="https://www.youtube.com/live/b-UZJVdLbXc?si=QZXjp_CRGrMAd8Il">
+            <div class="archive-main">
+              <div class="archive-label">Engineering Mathematics</div>
+              <div class="archive-note">Live session archive</div>
+            </div>
+            <div class="archive-cta">
+              <a href="https://www.youtube.com/live/b-UZJVdLbXc?si=QZXjp_CRGrMAd8Il" target="_blank" rel="noopener noreferrer">Open maths →</a>
+            </div>
+          </button>
+
+          <button class="archive-item link-xp" data-url="https://filebin.net/etdi5tbeu3s8u5tb/PHY%20lab%20reports%20%28EP%29.pdf">
+            <div class="archive-main">
+              <div class="archive-label">Physics Lab Reports</div>
+              <div class="archive-note">EP lab PDF</div>
+            </div>
+            <div class="archive-cta">
+              <a href="https://filebin.net/etdi5tbeu3s8u5tb/PHY%20lab%20reports%20%28EP%29.pdf" target="_blank" rel="noopener noreferrer">Open PDF</a>
+            </div>
+          </button>
+
+          <button class="archive-item link-xp" data-url="https://youtu.be/y-JBpmmNG9g?si=6Mx86HdvGo5ubu-e">
+            <div class="archive-main">
+              <div class="archive-label">Memes Break</div>
+              <div class="archive-note">Short reset for brain</div>
+            </div>
+            <div class="archive-cta">
+              <a href="https://youtu.be/y-JBpmmNG9g?si=6Mx86HdvGo5ubu-e" target="_blank" rel="noopener noreferrer">😂 Watch</a>
+            </div>
+          </button>
+        </div>
+
+        <div class="badge-row">
+          <span class="badge">C++ DSA</span>
+          <span class="badge">Physics</span>
+          <span class="badge">Thermo</span>
+          <span class="badge">Quantum</span>
+          <span class="badge">Memes</span>
+        </div>
+
+        <div class="marquee-shell">
+          <div class="marquee-inner">
+            <div class="marquee-track">
+              <span>Catch this → </span>
+              <a href="https://www.instagram.com/ritamiitian/#" target="_blank" rel="noopener noreferrer">
+                @ritamiitian
+              </a>
+              <span> • Stay hydrated • Touch grass between problem sets • </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // THEME TOGGLE WITH LOCALSTORAGE
+    const root = document.documentElement;
+    const themeToggleBtn = document.getElementById("themeToggle");
+    const themeLabel = document.getElementById("themeLabel");
+
+    function applyTheme(theme) {
+      if (theme === "light") {
+        root.classList.add("light");
+        themeLabel.textContent = "Light";
+        themeToggleBtn.querySelector(".emoji").textContent = "☀️";
+      } else {
+        root.classList.remove("light");
+        themeLabel.textContent = "Dark";
+        themeToggleBtn.querySelector(".emoji").textContent = "🌙";
+      }
+    }
+
+    const savedTheme = localStorage.getItem("ritam-theme");
+    applyTheme(savedTheme || "dark");
+
+    themeToggleBtn.addEventListener("click", () => {
+      const current = root.classList.contains("light") ? "light" : "dark";
+      const next = current === "light" ? "dark" : "light";
+      applyTheme(next);
+      localStorage.setItem("ritam-theme", next);
+    });
+
+    // SIMPLE NAME PERSONALIZATION
+    const nameLabel = document.getElementById("userNameLabel");
+    const storedName = localStorage.getItem("ritam-name");
+    if (storedName) {
+      nameLabel.textContent = storedName;
+    } else {
+      setTimeout(() => {
+        const n = prompt("What should I call you?", "Ritam");
+        if (n && n.trim()) {
+          const clean = n.trim();
+          nameLabel.textContent = clean;
+          localStorage.setItem("ritam-name", clean);
+        }
+      }, 600);
+    }
+
+    // XP BAR – LEVEL UP WHEN LINKS ARE CLICKED
+    let xp = 0;
+    const xpFill = document.getElementById("xpFill");
+    const xpPercent = document.getElementById("xpPercent");
+
+    function updateXP(add) {
+      xp = Math.min(100, xp + add);
+      xpFill.style.width = xp + "%";
+      xpPercent.textContent = xp + "%";
+    }
+
+    document.querySelectorAll(".link-xp").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const url = btn.getAttribute("data-url");
+        updateXP(10);
+        window.open(url, "_blank", "noopener");
+      });
+    });
+
+    // FADE-IN ON SCROLL USING INTERSECTIONOBSERVER
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("in-view");
+            obs.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.25
+      }
+    );
+
+    document.querySelectorAll(".fade-in").forEach((el) => observer.observe(el));
+
+    // KONAMI CODE EASTER EGG
+    const konami = [
+      "ArrowUp",
+      "ArrowUp",
+      "ArrowDown",
+      "ArrowDown",
+      "ArrowLeft",
+      "ArrowRight",
+      "ArrowLeft",
+      "ArrowRight",
+      "b",
+      "a"
+    ];
+    let buffer = [];
+
+    window.addEventListener("keydown", (e) => {
+      buffer.push(e.key);
+      if (buffer.length > konami.length) buffer.shift();
+      if (konami.every((k, i) => k === buffer[i])) {
+        buffer = [];
+        triggerKonami();
+      }
+    });
+
+    function triggerKonami() {
+      const body = document.body;
+      const original = body.style.filter || "";
+      body.style.filter = "hue-rotate(260deg) saturate(1.6)";
+      const note = document.createElement("div");
+      note.textContent = "Konami mode: study buff activated ⚡";
+      note.style.position = "fixed";
+      note.style.bottom = "18px";
+      note.style.left = "50%";
+      note.style.transform = "translateX(-50%)";
+      note.style.padding = "8px 16px";
+      note.style.borderRadius = "999px";
+      note.style.background = "rgba(0, 0, 0, 0.8)";
+      note.style.color = "#fff";
+      note.style.fontSize = "0.82rem";
+      note.style.zIndex = "9999";
+      note.style.boxShadow = "0 10px 25px rgba(0, 0, 0, 0.75)";
+      note.style.opacity = "0";
+      note.style.transition = "opacity 0.2s ease-out, transform 0.2s ease-out";
+      document.body.appendChild(note);
+
+      requestAnimationFrame(() => {
+        note.style.opacity = "1";
+        note.style.transform = "translateX(-50%) translateY(-4px)";
+      });
+
+      setTimeout(() => {
+        note.style.opacity = "0";
+        note.style.transform = "translateX(-50%) translateY(4px)";
+        setTimeout(() => {
+          note.remove();
+          body.style.filter = original;
+        }, 260);
+      }, 1400);
+    }
+  </script>
+</body>
+</html>
